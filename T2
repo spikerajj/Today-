@@ -1,0 +1,120 @@
+ng new city-dropdown-app
+cd city-dropdown-app
+
+ng add @angular/material
+
+ng generate component city-dropdown
+ng generate component city-popup1
+ng generate component city-popup2
+
+app.module.ts
+
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
+
+import { AppComponent } from './app.component';
+import { CityDropdownComponent } from './city-dropdown/city-dropdown.component';
+import { CityPopup1Component } from './city-popup1/city-popup1.component';
+import { CityPopup2Component } from './city-popup2/city-popup2.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CityDropdownComponent,
+    CityPopup1Component,
+    CityPopup2Component
+  ],
+  imports: [
+    BrowserModule,
+    MatSelectModule,
+    MatDialogModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  entryComponents: [CityPopup1Component, CityPopup2Component]
+})
+export class AppModule { }
+
+city-dropdown.component.ts
+
+import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { CityPopup1Component } from '../city-popup1/city-popup1.component';
+import { CityPopup2Component } from '../city-popup2/city-popup2.component';
+
+@Component({
+  selector: 'app-city-dropdown',
+  templateUrl: './city-dropdown.component.html',
+  styleUrls: ['./city-dropdown.component.css']
+})
+export class CityDropdownComponent {
+
+  cities = [
+    { name: 'New York', value: 'new-york' },
+    { name: 'Los Angeles', value: 'los-angeles' }
+  ];
+
+  constructor(public dialog: MatDialog) { }
+
+  openPopup(cityValue: string) {
+    if (cityValue === 'new-york') {
+      this.dialog.open(CityPopup1Component);
+    } else if (cityValue === 'los-angeles') {
+      this.dialog.open(CityPopup2Component);
+    }
+  }
+}
+
+city-dropdown.component.html
+
+<mat-form-field appearance="fill">
+  <mat-label>Select City</mat-label>
+  <mat-select (selectionChange)="openPopup($event.value)">
+    <mat-option *ngFor="let city of cities" [value]="city.value">
+      {{ city.name }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+city-popup1.component.ts
+
+// city-popup1.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-city-popup1',
+  templateUrl: './city-popup1.component.html',
+  styleUrls: ['./city-popup1.component.css']
+})
+export class CityPopup1Component { }
+
+
+
+city-popup2.component.ts
+
+// city-popup2.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-city-popup2',
+  templateUrl: './city-popup2.component.html',
+  styleUrls: ['./city-popup2.component.css']
+})
+export class CityPopup2Component { }
+
+
+html
+<!-- city-popup1.component.html -->
+<h1>Popup for New York</h1>
+<!-- Add your form or content here -->
+<!-- city-popup2.component.html -->
+<h1>Popup for Los Angeles</h1>
+<!-- Add your form or content here -->
+
+
+ng serve 
+
