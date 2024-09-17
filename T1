@@ -1,0 +1,172 @@
+ng new dependent-dropdown
+cd dependent-dropdown
+ng serve
+
+ng add @angular/material
+
+ng generate component dropdown
+ng generate component city-popup1
+ng generate component city-popup2
+
+ng generate service data
+
+
+data.service.ts
+
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DataService {
+
+  private countries = [
+    { name: 'USA', states: [{ name: 'California', cities: ['Los Angeles', 'San Francisco'] }, { name: 'New York', cities: ['New York City', 'Buffalo'] }] },
+    { name: 'Canada', states: [{ name: 'Ontario', cities: ['Toronto', 'Ottawa'] }, { name: 'Quebec', cities: ['Montreal', 'Quebec City'] }] }
+  ];
+
+  getCountries() {
+    return this.countries;
+  }
+
+  getStates(country: string) {
+    const foundCountry = this.countries.find(c => c.name === country);
+    return foundCountry ? foundCountry.states : [];
+  }
+
+  getCities(country: string, state: string) {
+    const states = this.getStates(country);
+    const foundState = states.find(s => s.name === state);
+    return foundState ? foundState.cities : [];
+  }
+}
+
+drop-down component.ts
+
+import { Component } from '@angular/core';
+import { DataService } from '../data.service';
+import { MatDialog } from '@angular/material/dialog';
+import { CityPopup1Component } from '../city-popup1/city-popup1.component';
+import { CityPopup2Component } from '../city-popup2/city-popup2.component';
+
+@Component({
+  selector: 'app-dropdown',
+  templateUrl: './dropdown.component.html',
+  styleUrls: ['./dropdown.component.css']
+})
+export class DropdownComponent {
+  countries = [];
+  states = [];
+  cities = [];
+  selectedCountry = '';
+  selectedState = '';
+  selectedCity = '';
+
+  constructor(private dataService: DataService, private dialog: MatDialog) {
+    this.countries = this.dataService.getCountries();
+  }
+
+  onCountryChange(country: string) {
+    this.selectedCountry = country;
+    this.states = this.dataService.getStates(country);
+    this.cities = [];
+    this.selectedState = '';
+    this.selectedCity = '';
+  }
+
+  onStateChange(state: string) {
+    this.selectedState = state;
+    this.cities = this.dataService.getCities(this.selectedCountry, state);
+    this.selectedCity = '';
+  }
+
+  onCityChange(city: string) {
+    this.selectedCity = city;
+    this.openCityPopup(city);
+  }
+
+  openCityPopup(city: string) {
+    let dialogComponent;
+
+    if (city === 'Los Angeles' || city === 'San Francisco') {
+      dialogComponent = CityPopup1Component;
+    } else if (city === 'New York City' || city === 'Buffalo') {
+      dialogComponent = CityPopup2Component;
+    } else {
+      return;
+    }
+
+    this.dialog.open(dialogComponent);
+  }
+}
+
+drop-down html 
+
+<div>
+  <mat-form-field>
+    <mat-label>Country</mat-label>
+    <mat-select (selectionChange)="onCountryChange($event.value)">
+      <mat-option *ngFor="let country of countries" [value]="country.name">{{ country.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>State</mat-label>
+    <mat-select (selectionChange)="onStateChange($event.value)" [disabled]="!selectedCountry">
+      <mat-option *ngFor="let state of states" [value]="state.name">{{ state.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>City</mat-label>
+    <mat-select (selectionChange)="onCityChange($event.value)" [disabled]="!selectedState">
+      <mat-option *ngFor="let city of cities" [value]="city">{{ city }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+html 
+
+<h1>City Popup 1</h1>
+<p>Details for City Popup 1</p>
+
+<h1>City Popup 2</h1>
+<p>Details for City Popup 2</p>
+
+app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule } from '@angular/material/dialog';
+import { AppComponent } from './app.component';
+import { DropdownComponent } from './dropdown/dropdown.component';
+import { CityPopup1Component } from './city-popup1/city-popup1.component';
+import { CityPopup2Component } from './city-popup2/city-popup2.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DropdownComponent,
+    CityPopup1Component,
+    CityPopup2Component
+  ],
+  imports: [
+    BrowserModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatDialogModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  entryComponents: [CityPopup1Component, CityPopup2Component] // This is needed for Angular Material Dialog
+})
+export class AppModule { }
+
+
+
+ng serve
+
+
+
+
